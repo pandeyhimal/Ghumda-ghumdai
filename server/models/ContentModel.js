@@ -14,6 +14,7 @@ const ContentSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     fullDescription: { type: String, required: true },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     category: {
       type: String,
       enum: ["places", "food", "traditions"],
@@ -29,6 +30,7 @@ const ContentSchema = new mongoose.Schema(
     reviewCount: { type: Number, default: 0, min: 0 },
     location: { type: LocationSchema, required: false },
     tips: { type: [String], default: [] },
+    tags: { type: [String], default: [] },
     bestTime: { type: String },
     price: { type: String },
     difficulty: { type: String },
