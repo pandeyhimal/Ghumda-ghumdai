@@ -1,4 +1,3 @@
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mountain, Users, MapPin, Heart, Target, Star } from 'lucide-react';
@@ -11,7 +10,6 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       
       <main className="pt-20 pb-12">
         {/* Hero Section */}
