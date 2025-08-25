@@ -19,7 +19,7 @@ import { useContent } from "@/contexts/ContentContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Header } from "@/components/Header";
+
 
 const categoryColors = {
   places: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -53,7 +53,7 @@ export const Bookmarks = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <Header />
+      
       <div className="container mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="mb-8">
