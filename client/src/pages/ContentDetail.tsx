@@ -1,5 +1,4 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,7 +49,7 @@ export default function ContentDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+     
 
       <main className="pt-20 pb-12">
         <div className="container mx-auto px-4">
