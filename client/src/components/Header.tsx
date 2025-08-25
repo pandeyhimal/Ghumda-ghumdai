@@ -31,7 +31,7 @@ export const Header = () => {
               <Mountain className="h-8 w-8 text-primary" />
               <div>
                 <h1 className="font-bold text-xl text-foreground">
-                  Ghumda <span className="text-pink-500">Ghumdai</span>
+                  Ghumda <span className="text-secondary">Ghumdai</span>
                 </h1>
                 <p className="text-xs text-muted-foreground -mt-1">
                   Travel Together
@@ -88,7 +88,8 @@ export const Header = () => {
                   Bookmarks ({bookmarks.length})
                 </Button>
 
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => navigate("/add-content")}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Content
                 </Button>
@@ -170,6 +171,7 @@ export const Header = () => {
                       variant="outline"
                       size="sm"
                       className="justify-start"
+                      onClick={() => navigate("/add-content")}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Content
