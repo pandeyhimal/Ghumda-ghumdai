@@ -1,4 +1,3 @@
-import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { SearchFilters } from "@/components/SearchFilters";
 import { ContentGrid } from "@/components/ContentGrid";
@@ -13,7 +12,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
+    
       <Hero />
       
       {/* Search Section */}
@@ -37,12 +36,12 @@ const Index = () => {
                         <Mountain className="h-8 w-8 text-primary" />
             </div>
 
-            <h3 className="text-xl font-bold">Ghumda <span className="text-pink-500">Ghumdai</span> </h3>
+            <h3 className="text-xl font-bold">Ghumda <span className="text-secondary">Ghumdai</span> </h3>
           </div>
           <p className="text-primary-foreground/80 mb-4">
             {t('footer.description')}
           </p>
-          <p className="text-primary-foreground/60 text-sm">© 2024 Ghumda <span className="text-pink-500">Ghumdai</span>. Made By <span className="font-semibold">Team Sanothimi</span>  for Nepal tourism.
+          <p className="text-primary-foreground/60 text-sm">© 2024 Ghumda <span className="text-secondary">Ghumdai</span>. Made By <span className="font-semibold">Team Sanothimi</span>  for Nepal tourism.
             {/* {t('footer.copyright')} */}
           </p>
         </div>
