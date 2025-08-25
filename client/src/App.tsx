@@ -13,8 +13,9 @@ import ContentDetail from "./pages/ContentDetail";
 import NotFound from "./pages/NotFound";
 import { Bookmarks } from "./pages/Bookmarks";
 import SocialLogin from "./components/SocialLogin";
-import { Scroll } from "lucide-react";
+import Layout from "./components/Layout";
 import  {ScrollToTop}  from "../utils/ScrolltoTop";
+import AddContent from "./pages/AddContent";
 
 const queryClient = new QueryClient();
 
@@ -28,16 +29,19 @@ const App = () => (
           <BrowserRouter>
           <ScrollToTop />
             <Routes>
+            <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/about" element={<About />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
+              <Route path="/add-content" element={<AddContent />} />
               <Route path="/content/:title" element={<ContentDetail />} />
               {/* social login callback handler */}
               <Route path="/auth/callback" element={<SocialLogin />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
+              </Route>
             </Routes>
           </BrowserRouter>
         </ContentProvider>
