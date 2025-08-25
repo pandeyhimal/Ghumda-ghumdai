@@ -22,6 +22,10 @@ interface User {
   bookmarks: string[];
 }
 
+interface ValidationErrorItem { field: string; message: string }
+
+interface AddContentPayload { [key: string]: unknown }
+
 interface ContentContextType {
   content: ContentItem[];
   filteredContent: ContentItem[];
@@ -38,6 +42,7 @@ interface ContentContextType {
     email: string,
     password: string
   ) => Promise<{ error?: string }>;
+  addContent: (payload: AddContentPayload) => Promise<unknown>;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
@@ -96,8 +101,9 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
       } else {
         return { error: data.error || "Login failed" };
       }
-    } catch (err: any) {
-      return { error: err.message || "Login failed" };
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      return { error: e?.message || "Login failed" };
     }
   };
 
@@ -131,33 +137,37 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
       } else {
         return { error: data.error || data.message || "Registration failed" };
       }
-    } catch (err: any) {
-      return { error: err.message || "Registration failed" };
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      return { error: e?.message || "Registration failed" };
     }
   };
 
-//   const addContent = async (newContent: ContentItem) => {
-//   try {
-//     const res = await fetch("http://localhost:5000/api/content", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${auth?.token}`, // from AuthContext
-//       },
-//       body: JSON.stringify(newContent),
-//     });
+  const addContent = async (newContent: AddContentPayload) => {
+    const token = localStorage.getItem("ghumda-token");
+    if (!token) throw new Error("Not authenticated");
 
-//     if (!res.ok) throw new Error("Failed to add content");
+    const res = await fetch("http://localhost:5000/api/content", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newContent),
+    });
 
-//     const created = await res.json();
-//     setContents((prev) => [...prev, created]); // update local state
-//     return created;
-//   } catch (err) {
-//     console.error("Add Content Error:", err);
-//     throw err;
-//   }
-// };
-
+    if (!res.ok) {
+      const err = (await res.json().catch(() => ({}))) as { message?: string; errors?: ValidationErrorItem[] };
+      if (res.status === 422 && Array.isArray(err?.errors)) {
+        const error = new Error(err.message || "Validation failed") as Error & { type?: string; errors?: ValidationErrorItem[] };
+        error.type = "validation";
+        error.errors = err.errors;
+        throw error;
+      }
+      throw new Error(err.message || "Failed to add content");
+    }
+    return res.json();
+  };
 
   const toggleBookmark = async (contentId: string) => {
     if (!isLoggedIn || !currentUser) {
@@ -249,6 +259,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         register,
+        addContent,
       }}
     >
       {children}
