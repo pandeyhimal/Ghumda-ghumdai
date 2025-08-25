@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/Auth.js";
 import adminRoutes from "./routes/Admin.js";
 import bookmark from "./routes/Bookmarks.js";
+import contentRoutes from "./routes/ContentRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -19,7 +20,7 @@ connectDB();
 //   credentials: true
 // }));
 
-const allowedOrigins = ["http://localhost:8080", "http://localhost:6000"];
+const allowedOrigins = ["http://localhost:8080", "http://localhost:6000", "http://localhost:5173", "http://localhost:5000"];
 app.use(cors({
   origin: (origin, callback) => {
     if (allowedOrigins.includes(origin) || !origin) {
@@ -38,6 +39,7 @@ app.use(express.json());
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", bookmark);
+app.use("/api/content", contentRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 6000;
