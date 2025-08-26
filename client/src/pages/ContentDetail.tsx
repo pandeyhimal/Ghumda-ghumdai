@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 // import { Separator } from "@/components/ui/separator";
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import {
   ArrowLeft,
   MapPin,
@@ -14,7 +14,7 @@ import {
   DollarSign,
   TrendingUp,
 } from "lucide-react";
-import { getContentById, getCommentsByContentId } from "@/data/mockData";
+// Comments are currently mocked; hook up API later
 import { useContent } from "@/contexts/ContentContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -25,16 +25,34 @@ const categoryColors = {
 };
 
 export default function ContentDetail() {
-  // const { id } = useParams<{ id: string }>();
-  const { title } = useParams<{ title: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { bookmarks, toggleBookmark, isLoggedIn } = useContent();
+  const { bookmarks, toggleBookmark, isLoggedIn, content } = useContent();
   const { t } = useLanguage();
 
-  const content = title ? getContentById(title) : null;
-  const comments = title ? getCommentsByContentId(content?.id ?? "") : [];
+  const item = useMemo(
+    () => content.find((c) => c.id === (id || "")) || null,
+    [content, id]
+  );
+  const comments: Array<{
+    id: string;
+    author: string;
+    rating: number;
+    comment: string;
+    date: string;
+  }> = [];
 
-  if (!content) {
+  if (!item) {
+    if (!content || content.length === 0) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2">Loading...</h2>
+            <p className="text-muted-foreground">Fetching content details</p>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -45,12 +63,10 @@ export default function ContentDetail() {
     );
   }
 
-  const isBookmarked = bookmarks.includes(content.id);
+  const isBookmarked = bookmarks.includes(item.id);
 
   return (
     <div className="min-h-screen bg-background">
-     
-
       <main className="pt-20 pb-12">
         <div className="container mx-auto px-4">
           {/* Back Navigation */}
@@ -71,24 +87,25 @@ export default function ContentDetail() {
               {/* Hero Image */}
               <div className="relative overflow-hidden rounded-lg">
                 <img
-                  src={content.image}
-                  alt={content.title}
+                  src={item.image}
+                  alt={item.title}
                   className="w-full h-64 md:h-96 object-cover"
                 />
                 <div className="absolute top-4 left-4">
-                  <Badge className={categoryColors[content.category]}>
-                    {content.category.charAt(0).toUpperCase() +
-                      content.category.slice(1)}
+                  <Badge className={categoryColors[item.category]}>
+                    {item.category.charAt(0).toUpperCase() +
+                      item.category.slice(1)}
                   </Badge>
                 </div>
                 <div className="absolute top-4 right-4">
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={(e) =>{
+                    onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                       toggleBookmark(content.id)}}
+                      toggleBookmark(item.id);
+                    }}
                     className="border border-gray-300 text-gray-500 bg-background/80 backdrop-blur-sm hover:bg-background"
                   >
                     <Heart
@@ -105,7 +122,7 @@ export default function ContentDetail() {
                 <div className="flex justify-between mb-4">
                   <div className="flex items-center text-sm text-foreground mb-2">
                     <MapPin className="h-4 w-4 mr-1" />
-                    {content.municipality}, {content.district}
+                    {item.municipality}, {item.district}
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground mb-6 space-x-4">
                     <div className="flex items-center space-x-1">
@@ -113,27 +130,45 @@ export default function ContentDetail() {
                       <span className="font-semibold">
                         Submitted by:{" "}
                         <span className="font-semibold text-primary">
-                          {content.author}
+                          {(
+                            item as unknown as {
+                              _meta?: { authorName?: string };
+                            }
+                          )._meta?.authorName || "Unknown"}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span className="font-semibold">
+                        Submitted on:{" "}
+                        <span>
+                          {(() => {
+                            const meta = (
+                              item as unknown as {
+                                _meta?: { createdAt?: string };
+                              }
+                            )._meta;
+                            return meta?.createdAt
+                              ? new Date(meta.createdAt).toLocaleDateString()
+                              : "";
+                          })()}
                         </span>
                       </span>
                     </div>
                   </div>
-                  <div className=" space-x-1">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span>{content.submittedDate}</span>
-                  </div>
                 </div>
 
                 <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                  {content.title}
+                  {item.title}
                 </h1>
 
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="flex items-center space-x-1">
                     <Star className="h-5 w-5 fill-current text-yellow-400" />
-                    <span className="font-medium">{content.rating}</span>
+                    <span className="font-medium">{item.rating}</span>
                     <span className="text-muted-foreground">
-                      ({content.reviewCount} reviews)
+                      ({item.reviewCount} reviews)
                     </span>
                   </div>
                 </div>
@@ -144,24 +179,33 @@ export default function ContentDetail() {
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-3">About</h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    {content.fullDescription}
+                    {item.fullDescription}
                   </p>
                 </CardContent>
               </Card>
 
               {/* Location (moved from sidebar) */}
-              {content.location && (
+              {item.location && (
                 <Card>
                   <CardContent className="p-6">
                     <h3 className="font-semibold mb-4">Location</h3>
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
-                        {content.location.address}
+                        {item.location.address}
                       </p>
-                      <div className="bg-muted h-32 rounded-lg flex items-center justify-center">
-                        <span className="text-muted-foreground">
-                          Map Placeholder
-                        </span>
+                      <div className="rounded-lg overflow-hidden border">
+                        <iframe
+                          title="map"
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${
+                            item.location.lng - 0.01
+                          }%2C${item.location.lat - 0.01}%2C${
+                            item.location.lng + 0.01
+                          }%2C${item.location.lat + 0.01}&layer=mapnik&marker=${
+                            item.location.lat
+                          }%2C${item.location.lng}`}
+                          style={{ width: "100%", height: "320px", border: 0 }}
+                          loading="lazy"
+                        />
                       </div>
                     </div>
                   </CardContent>
@@ -223,37 +267,37 @@ export default function ContentDetail() {
                 <CardContent className="p-6">
                   <h3 className="font-semibold mb-4">Quick Info</h3>
                   <div className="space-y-3">
-                    {content.bestTime && (
+                    {item.bestTime && (
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Best Time</p>
                           <p className="text-sm text-muted-foreground">
-                            {content.bestTime}
+                            {item.bestTime}
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {content.difficulty && (
+                    {item.difficulty && (
                       <div className="flex items-center space-x-2">
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Difficulty</p>
                           <p className="text-sm text-muted-foreground">
-                            {content.difficulty}
+                            {item.difficulty}
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {content.price && (
+                    {item.price && (
                       <div className="flex items-center space-x-2">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Price Range</p>
                           <p className="text-sm text-muted-foreground">
-                            {content.price}
+                            {item.price}
                           </p>
                         </div>
                       </div>
@@ -263,14 +307,14 @@ export default function ContentDetail() {
               </Card>
 
               {/* Tips & Recommendations (moved from main content) */}
-              {content.tips && content.tips.length > 0 && (
+              {item.tips && item.tips.length > 0 && (
                 <Card>
                   <CardContent className="p-6">
                     <h2 className="text-xl font-semibold mb-3">
                       Tips & Recommendations
                     </h2>
                     <ul className="space-y-2">
-                      {content.tips.map((tip, index) => (
+                      {item.tips.map((tip, index) => (
                         <li key={index} className="flex items-start space-x-2">
                           <span className="text-primary font-bold">•</span>
                           <span className="text-muted-foreground">{tip}</span>
@@ -282,16 +326,16 @@ export default function ContentDetail() {
               )}
 
               {/* More Images */}
-              {content.images && content.images.length > 1 && (
+              {item.images && item.images.length > 1 && (
                 <Card>
                   <CardContent className="p-6">
                     <h3 className="font-semibold mb-4">More Photos</h3>
                     <div className="grid grid-cols-2 gap-2">
-                      {content.images.slice(1, 5).map((image, index) => (
+                      {item.images.slice(1, 5).map((image, index) => (
                         <img
                           key={index}
                           src={image}
-                          alt={`${content.title} ${index + 1}`}
+                          alt={`${item.title} ${index + 1}`}
                           className="w-full h-20 object-cover rounded"
                         />
                       ))}
@@ -306,5 +350,3 @@ export default function ContentDetail() {
     </div>
   );
 }
-
-
