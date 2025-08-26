@@ -34,6 +34,7 @@ const ContentSchema = new mongoose.Schema(
     bestTime: { type: String },
     price: { type: String },
     difficulty: { type: String },
+    status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
   },
   { timestamps: true }
 );
