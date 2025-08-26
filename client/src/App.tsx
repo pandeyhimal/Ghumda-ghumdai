@@ -16,6 +16,7 @@ import SocialLogin from "./components/SocialLogin";
 import Layout from "./components/Layout";
 import  {ScrollToTop}  from "../utils/ScrolltoTop";
 import AddContent from "./pages/AddContent";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,8 @@ const App = () => (
               <Route path="/register" element={<Register />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
               <Route path="/add-content" element={<AddContent />} />
-              <Route path="/content/:title" element={<ContentDetail />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/content/:id" element={<ContentDetail />} />
               {/* social login callback handler */}
               <Route path="/auth/callback" element={<SocialLogin />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
