@@ -12,6 +12,8 @@ import {
   getDistrictsByProvince,
   getLocalLevelsByDistrict
 } from "@/data/nepalAdministrativeDivision";
+import EnhancedSearchBar from "./EnhancedSearchBar";
+import { Location } from "@/types";
 
 interface SearchFiltersProps {
   onSearch?: (filters: SearchFilters) => void;
@@ -23,6 +25,8 @@ interface SearchFilters {
   district: string;
   municipality: string;
   category: string;
+  location?: Location | null;
+  radius?: number;
 }
 
 const provinces = ["All Provinces", ...getAllProvinces()];
@@ -37,7 +41,9 @@ export const SearchFilters = ({ onSearch }: SearchFiltersProps) => {
     province: "",
     district: "",
     municipality: "",
-    category: ""
+    category: "",
+    location: null,
+    radius: 10
   });
 
   const [districtOptions, setDistrictOptions] = useState<string[]>(["All Districts", ...getAllDistricts()]);
@@ -109,8 +115,28 @@ export const SearchFilters = ({ onSearch }: SearchFiltersProps) => {
     onSearch?.(searchFilters);
   };
 
+  const handleEnhancedSearch = (query: string, location: Location | null, radius: number) => {
+    const searchFilters = {
+      ...filters,
+      keyword: query,
+      location: location,
+      radius: radius
+    };
+
+    searchContent(searchFilters);
+    onSearch?.(searchFilters);
+  };
+
   return (
     <Card className="p-6 shadow-[var(--shadow-card)] bg-card/95 backdrop-blur-sm">
+      {/* Enhanced Search Bar */}
+      {/* <div className="mb-6">
+        <EnhancedSearchBar
+          onSearch={handleEnhancedSearch}
+          placeholder={t('search.keyword.placeholder')}
+        />
+      </div> */}
+
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="md:col-span-2">
           <div className="relative">
