@@ -6,6 +6,7 @@ import authRoutes from "./routes/Auth.js";
 import adminRoutes from "./routes/Admin.js";
 import bookmark from "./routes/Bookmarks.js";
 import contentRoutes from "./routes/ContentRoutes.js";
+import path from "path";
 
 dotenv.config();
 const app = express();
@@ -20,7 +21,13 @@ connectDB();
 //   credentials: true
 // }));
 
-const allowedOrigins = ["http://localhost:8080", "http://localhost:6000", "http://localhost:5173", "http://localhost:5000"];
+const allowedOrigins = [
+  "http://localhost:8080",
+  "http://localhost:6000",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:5000"
+];
 app.use(cors({
   origin: (origin, callback) => {
     if (allowedOrigins.includes(origin) || !origin) {
@@ -34,6 +41,8 @@ app.use(cors({
 
 // Middleware
 app.use(express.json());
+// Serve static uploads (for any locally stored files)
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Routes
 app.use("/api/admin", adminRoutes);
