@@ -11,12 +11,12 @@ interface ContentCardProps {
   title: string;
   description: string;
   category: "places" | "food" | "traditions";
-  province: string;
-  district: string;
-  municipality: string;
+  province?: string;
+  district?: string;
+  municipality?: string;
   image: string;
-  rating: number;
-  reviewCount: number;
+  rating?: number;
+  reviewCount?: number;
   isBookmarked?: boolean;
 }
 
@@ -74,7 +74,7 @@ export const ContentCard = ({
       <CardContent className="p-4">
         <div className="flex items-center text-sm text-muted-foreground mb-2">
           <MapPin className="h-4 w-4 mr-1" />
-        {province}  {municipality}, {district}
+        {(province || "")}  {(municipality || "")}{municipality ? ", " : ""}{district || ""}
         </div>
         
         <h3 className="font-semibold text-lg mb-2 line-clamp-1">{title}</h3>
@@ -83,8 +83,8 @@ export const ContentCard = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-1">
             <Star className="h-4 w-4 fill-current text-yellow-400" />
-            <span className="text-sm font-medium">{rating}</span>
-            <span className="text-sm text-muted-foreground">({reviewCount})</span>
+            <span className="text-sm font-medium">{typeof rating === 'number' ? rating : 0}</span>
+            <span className="text-sm text-muted-foreground">({typeof reviewCount === 'number' ? reviewCount : 0})</span>
           </div>
           
           <div className="flex items-center text-sm text-muted-foreground">
