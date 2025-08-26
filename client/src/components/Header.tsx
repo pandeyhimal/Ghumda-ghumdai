@@ -13,13 +13,14 @@ import {
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useContent } from "@/contexts/ContentContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn, currentUser, logout, bookmarks } = useContent();
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <header className="sticky top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b">
@@ -38,32 +39,48 @@ export const Header = () => {
                 </p>
               </div>
             </Link>
-
-            {/* <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder={t("search.keyword.placeholder")}
-              className="max-w-2xl pl-10 border-2 border-gray-700 focus:border-primary"
-              // value={filters.keyword}
-              // onChange={(e) => handleKeywordChange(e.target.value)}
-            />
-          </div> */}
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link
+          <nav className="hidden md:flex items-center space-x-2">
+            <NavLink
               to="/"
-              className="text-foreground hover:text-primary transition-colors"
+              className={({ isActive }) =>
+                `px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "text-primary bg-primary/10 shadow-sm"
+                    : "text-foreground hover:text-primary hover:bg-primary/5"
+                }`
+              }
             >
               Home
-            </Link>
-            <Link
+            </NavLink>
+            <NavLink
               to="/about"
-              className="text-foreground hover:text-primary transition-colors"
+              className={({ isActive }) =>
+                `px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "text-primary bg-primary/10 shadow-sm"
+                    : "text-foreground hover:text-primary hover:bg-primary/5"
+                }`
+              }
             >
               {t("nav.about")}
-            </Link>
+            </NavLink>
+            {/* {isLoggedIn && currentUser?.role === "admin" && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "text-secondary bg-secondary/10 shadow-sm"
+                      : "text-secondary hover:text-secondary-foreground hover:bg-secondary/10"
+                  }`
+                }
+              >
+                Admin Panel
+              </NavLink>
+            )} */}
           </nav>
 
           {/* Desktop Actions */}
@@ -87,6 +104,12 @@ export const Header = () => {
                   <Heart className="h-4 w-4 mr-2" />
                   Bookmarks ({bookmarks.length})
                 </Button>
+
+                {currentUser?.role === "admin" && (
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="hover:translate-y-[-1px] transition-all">
+                    Admin Panel
+                  </Button>
+                )}
 
                 <Button variant="outline" size="sm" onClick={() => navigate("/add-content")}
                 >
@@ -137,18 +160,26 @@ export const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <nav className="flex flex-col space-y-3">
-              <Link
+              <NavLink
                 to="/"
-                className="text-foreground hover:text-primary transition-colors px-2 py-1"
+                className={({ isActive }) => `px-2 py-1 rounded-md ${isActive ? "text-primary bg-primary/10" : "text-foreground hover:text-primary hover:bg-primary/5"}`}
               >
                 Home
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/about"
-                className="text-foreground hover:text-primary transition-colors px-2 py-1"
+                className={({ isActive }) => `px-2 py-1 rounded-md ${isActive ? "text-primary bg-primary/10" : "text-foreground hover:text-primary hover:bg-primary/5"}`}
               >
                 {t("nav.about")}
-              </Link>
+              </NavLink>
+              {isLoggedIn && currentUser?.role === "admin" && (
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) => `px-2 py-1 rounded-md ${isActive ? "text-secondary bg-secondary/10" : "text-secondary hover:bg-secondary/10"}`}
+                >
+                  Admin Panel
+                </NavLink>
+              )}
 
               <div className="flex flex-col space-y-2 pt-2 border-t">
                 <Button
