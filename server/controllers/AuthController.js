@@ -35,6 +35,7 @@ export const signup = async (req, res) => {
         _id: newUser._id,
         fullName: newUser.fullName,
         email: newUser.email,
+        role: newUser.role,
         bookmarks: newUser.bookmarks || [],
       },
     });
@@ -77,6 +78,7 @@ export const login = async (req, res) => {
         _id: user._id,
         fullName: user.fullName,
         email: user.email,
+        role: user.role,
         bookmarks: user.bookmarks || [],
       },
     });
