@@ -5,8 +5,9 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { ContentItem, mockContent, searchContent } from "@/data/mockData";
+import type { ContentItem } from "@/data/mockData";
 import { toast } from "sonner";
+import { API_BASE } from "@/lib/utils";
 
 interface SearchFilters {
   keyword: string;
@@ -14,12 +15,19 @@ interface SearchFilters {
   district: string;
   municipality: string;
   category: string;
+  location?: {
+    lat: number;
+    lng: number;
+    address: string;
+  } | null;
+  radius?: number;
 }
 
 interface User {
   _id: string;
   email: string;
   bookmarks: string[];
+  role?: "user" | "admin";
 }
 
 interface ValidationErrorItem { field: string; message: string }
@@ -35,7 +43,7 @@ interface ContentContextType {
   currentUser: User | null;
   searchContent: (filters: SearchFilters) => void;
   toggleBookmark: (contentId: string) => Promise<void>;
-  login: (email: string, password: string) => Promise<{ error?: string }>;
+  login: (email: string, password: string) => Promise<{ error?: string; user?: User | null }>;
   logout: () => void;
   register: (
     name: string,
@@ -48,15 +56,17 @@ interface ContentContextType {
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
 export const ContentProvider = ({ children }: { children: ReactNode }) => {
-  const [content] = useState<ContentItem[]>(mockContent);
+  const [content, setContent] = useState<ContentItem[]>([]);
   const [filteredContent, setFilteredContent] =
-    useState<ContentItem[]>(mockContent);
+    useState<ContentItem[]>([]);
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     keyword: "",
     province: "",
     district: "",
     municipality: "",
     category: "",
+    location: null,
+    radius: 10
   });
 
   const [bookmarks, setBookmarks] = useState<string[]>([]);
@@ -76,15 +86,127 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // Fetch content from backend on mount
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/content`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || "Failed to fetch content");
+
+        const mapped: ContentItem[] = (Array.isArray(data) ? data : []).map((item) => ({
+          id: item._id ?? item.id ?? "",
+          title: item.title ?? "",
+          description: item.description ?? "",
+          fullDescription: item.fullDescription ?? "",
+          category: item.category,
+          province: item.province ?? "",
+          district: item.district ?? "",
+          municipality: item.municipality ?? "",
+          ward: item.ward ?? "",
+          image: item.image ?? "",
+          images: Array.isArray(item.images) ? item.images : [],
+          rating: typeof item.rating === "number" ? item.rating : 0,
+          reviewCount: typeof item.reviewCount === "number" ? item.reviewCount : 0,
+          location: item.location ?? null,
+          tips: Array.isArray(item.tips) ? item.tips : [],
+          bestTime: item.bestTime ?? "",
+          price: item.price ?? "",
+          difficulty: item.difficulty ?? "",
+        }));
+
+        // Attach auxiliary fields for detail page via a parallel map
+        const auxById = new Map<string, { authorName: string; createdAt?: string }>();
+        (Array.isArray(data) ? data : []).forEach((item) => {
+          const key = (item._id ?? item.id ?? "") as string;
+          auxById.set(key, {
+            authorName: item?.author?.fullName || "",
+            createdAt: item?.createdAt,
+          });
+        });
+
+        const withMeta = mapped.map((m) => ({
+          ...m,
+          _meta: auxById.get(m.id) || { authorName: "", createdAt: undefined },
+        })) as Array<ContentItem & { _meta: { authorName: string; createdAt?: string } }>;
+
+        // Store with metadata so detail page can read it via type assertion
+        setContent(withMeta as unknown as ContentItem[]);
+        setFilteredContent(withMeta as unknown as ContentItem[]);
+      } catch (e) {
+        const err = e as { message?: string };
+        toast(err?.message || "Failed to load content");
+      }
+    };
+
+    fetchContent();
+  }, []);
+
   const handleSearch = (filters: SearchFilters) => {
     setSearchFilters(filters);
-    const results = searchContent(filters);
+    let results = [...content];
+
+    if (filters.keyword) {
+      const keyword = filters.keyword.toLowerCase();
+      results = results.filter((item) =>
+        item.title.toLowerCase().includes(keyword) ||
+        item.description.toLowerCase().includes(keyword) ||
+        item.fullDescription.toLowerCase().includes(keyword)
+      );
+    }
+
+    if (filters.district && filters.district !== "all") {
+      results = results.filter(
+        (item) => item.district.toLowerCase() === filters.district.toLowerCase()
+      );
+    }
+
+    if (filters.municipality && filters.municipality !== "all") {
+      results = results.filter(
+        (item) => item.municipality.toLowerCase() === filters.municipality.toLowerCase()
+      );
+    }
+
+    if (filters.category && filters.category !== "all") {
+      results = results.filter((item) => item.category === filters.category);
+    }
+
+    if (filters.location && filters.radius && filters.radius > 0) {
+      results = results.filter((item) => {
+        if (!item.location) return false;
+        const distance = calculateDistance(
+          filters.location!.lat,
+          filters.location!.lng,
+          item.location.lat,
+          item.location.lng
+        );
+        return distance <= (filters.radius as number);
+      });
+    }
+
     setFilteredContent(results);
   };
 
+  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371;
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return Math.round(distance * 100) / 100;
+  }
+
+  function toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+  }
+
   const login = async (email: string, password: string) => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -97,7 +219,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
         setCurrentUser(data.user);
         setIsLoggedIn(true);
         setBookmarks(data.user.bookmarks || []);
-        return {};
+        return { user: data.user };
       } else {
         return { error: data.error || "Login failed" };
       }
@@ -117,7 +239,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullName: name, email, password }),
@@ -147,7 +269,10 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem("ghumda-token");
     if (!token) throw new Error("Not authenticated");
 
-    const res = await fetch("http://localhost:5000/api/content", {
+    console.log("ContentContext: Sending content to backend:", newContent);
+    console.log("ContentContext: Location data:", newContent.location);
+
+    const res = await fetch(`${API_BASE}/api/content`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -191,12 +316,12 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
 
       if (isBookmarked) {
         // Remove bookmark
-        url = `http://localhost:5000/api/users/${userId}/bookmarks/${contentId}`;
+        url = `${API_BASE}/api/users/${userId}/bookmarks/${contentId}`;
         method = "DELETE";
         body = undefined;
       } else {
         // Add bookmark
-        url = `http://localhost:5000/api/users/${userId}/bookmarks`;
+        url = `${API_BASE}/api/users/${userId}/bookmarks`;
         method = "POST";
         body = JSON.stringify({ contentId });
       }
