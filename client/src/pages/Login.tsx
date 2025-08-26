@@ -45,7 +45,8 @@ export default function Login() {
         title: "Login successful!",
         description: "Welcome back to Ghumda Ghumdai",
       });
-      navigate("/");
+      const role = result.user?.role;
+      navigate(role === "admin" ? "/admin" : "/");
     }
   };
   return (
