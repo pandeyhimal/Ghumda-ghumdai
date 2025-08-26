@@ -21,10 +21,7 @@ export const ContentGrid = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredContent.length > 0 ? (
             filteredContent.map((item) => (
-              <ContentCard
-                province={""} key={item.id}
-                {...item}           
-                />
+              <ContentCard key={item.id} {...item} />
             ))
           ) : (
             <div className="col-span-full text-center py-12">
