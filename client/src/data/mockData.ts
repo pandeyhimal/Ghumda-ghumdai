@@ -275,6 +275,12 @@ export const searchContent = (filters: {
   district?: string;
   municipality?: string;
   category?: string;
+  location?: {
+    lat: number;
+    lng: number;
+    address: string;
+  } | null;
+  radius?: number;
 }): ContentItem[] => {
   let results = [...mockContent];
   
@@ -303,9 +309,47 @@ export const searchContent = (filters: {
     results = results.filter(item => item.category === filters.category);
   }
   
+  // Location-based filtering
+  if (filters.location && filters.radius && filters.radius > 0) {
+    results = results.filter(item => {
+      if (!item.location) return false;
+      
+      // Calculate distance using Haversine formula
+      const distance = calculateDistance(
+        filters.location.lat,
+        filters.location.lng,
+        item.location.lat,
+        item.location.lng
+      );
+      
+      return distance <= filters.radius;
+    });
+  }
+  
   return results;
 };
 
 export const getCommentsByContentId = (contentId: string): Comment[] => {
   return mockComments.filter(comment => comment.contentId === contentId);
 };
+
+// Helper function to calculate distance between two coordinates
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  
+  return Math.round(distance * 100) / 100; // Round to 2 decimal places
+}
+
+function toRadians(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
