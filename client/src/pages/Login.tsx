@@ -186,10 +186,10 @@ export default function Login() {
             </form>
           </Card>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
+          {/* <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Demo credentials:</p>
             <p>Email: demo@ghumdaghumdai.com | Password: demo123</p>
-          </div>
+          </div> */}
         </div>
       </main>
     </div>
