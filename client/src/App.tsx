@@ -17,6 +17,7 @@ import Layout from "./components/Layout";
 import  {ScrollToTop}  from "../utils/ScrolltoTop";
 import AddContent from "./pages/AddContent";
 import AdminDashboard from "./pages/AdminDashboard";
+import ForgotPassword from "./pages/ForgotPasswordPage";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Route>
+              <Route path="/forgot-password" element={<ForgotPassword />} />
             </Routes>
           </BrowserRouter>
         </ContentProvider>
