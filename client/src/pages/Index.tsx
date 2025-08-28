@@ -31,9 +31,9 @@ const Index = () => {
       <footer className="bg-primary text-primary-foreground py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-8 h-8 bg-primary-foreground rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 flex items-center justify-center">
               {/* <span className="text-primary font-bold text-sm">G</span> */}
-                        <Mountain className="h-8 w-8 text-primary" />
+                        <Mountain className="h-8 w-8 text-white" />
             </div>
 
             <h3 className="text-xl font-bold">Ghumda <span className="text-secondary">Ghumdai</span> </h3>
