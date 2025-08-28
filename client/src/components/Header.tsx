@@ -15,12 +15,48 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useContent } from "@/contexts/ContentContext";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
-export const Header = () => {
+export const Header = ({ minimal }: { minimal?: boolean }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn, currentUser, logout, bookmarks } = useContent();
   const navigate = useNavigate();
   const location = useLocation();
+
+    if (minimal) {
+    return (
+      <header className="sticky top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b">
+        <div className="container mx-auto px-4 flex items-center justify-between h-16">
+          <Link to="/" className="flex items-center space-x-2">
+            <Mountain className="h-8 w-8 text-primary" />
+            <div>
+                <h1 className="font-bold text-xl text-foreground">
+                  Ghumda <span className="text-secondary">Ghumdai</span>
+                </h1>
+                <p className="text-xs text-muted-foreground -mt-1">
+                  Travel Together
+                </p>
+              </div>
+          </Link>
+          <div className="flex space-x-4">
+            <Link to="/login">
+              <Button size="sm" variant="outline">
+                Login
+              </Button>
+            </Link>
+           <Link to="/register">
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-primary to-primary-glow"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    {t("nav.signup")}
+                  </Button>
+                </Link>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b">
