@@ -756,11 +756,11 @@ const AddContentForm: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-700 rounded-full flex items-center justify-center">
                 <Mountain className="h-7 w-7 text-white" />
               </div>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold bg-blue-600 bg-clip-text text-transparent mb-2">
               Share Your Discovery
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -1216,7 +1216,7 @@ const AddContentForm: React.FC = () => {
                 {/* Submit Button */}
                 <Button 
                   type="submit" 
-                  className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 shadow-lg" 
+                  className="w-full h-12 text-lg font-semibold bg-blue shadow-lg" 
                   disabled={isUploading}
                 >
                   {isUploading ? (
@@ -1245,7 +1245,7 @@ const AddContentForm: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 text-white py-16 mt-16">
+      {/* <footer className="bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 text-white py-16 mt-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-3 mb-6">
@@ -1266,6 +1266,25 @@ const AddContentForm: React.FC = () => {
               </p>
             </div>
           </div>
+        </div>
+      </footer> */}
+
+       <footer className="bg-primary text-primary-foreground py-12">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <div className="w-8 h-8 flex items-center justify-center">
+              {/* <span className="text-primary font-bold text-sm">G</span> */}
+                        <Mountain className="h-8 w-8 text-white" />
+            </div>
+
+            <h3 className="text-xl font-bold">Ghumda <span className="text-secondary">Ghumdai</span> </h3>
+          </div>
+          <p className="text-primary-foreground/80 mb-4">
+            {t('footer.description')}
+          </p>
+          <p className="text-primary-foreground/60 text-sm">© 2024 Ghumda <span className="text-secondary">Ghumdai</span>. Made By <span className="font-semibold">Team Sanothimi</span>  for Nepal tourism.
+            {/* {t('footer.copyright')} */}
+          </p>
         </div>
       </footer>
     </div>
