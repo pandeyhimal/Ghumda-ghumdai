@@ -6,10 +6,14 @@ import authRoutes from "./routes/Auth.js";
 import adminRoutes from "./routes/Admin.js";
 import bookmark from "./routes/Bookmarks.js";
 import contentRoutes from "./routes/ContentRoutes.js";
+import resetPassword from "./routes/PasswordResetroute.js";
 import path from "path";
+import passport from "passport";
+import "./config/passport.js";
 
 dotenv.config();
 const app = express();
+app.use(passport.initialize());
 
 // ✅ Connect Database
 connectDB();
@@ -47,9 +51,17 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 // Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api", resetPassword);
 app.use("/api/users", bookmark);
 app.use("/api/content", contentRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 6000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+
+// app._router.stack.forEach((r) => {
+//   if (r.route && r.route.path) {
+//     console.log("Route:", r.route.path);
+//   }
+// });
