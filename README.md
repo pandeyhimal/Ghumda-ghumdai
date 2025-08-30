@@ -62,7 +62,7 @@ npm run dev
 
 **Himal Pandey**
 
-**Portfolio:** himalpandey.vercel.app
+**Portfolio:** [himalpandey.vercel.app](https://himalpandey.vercel.app/)
 
 **GitHub:** github.com/pandeyhimal
 
